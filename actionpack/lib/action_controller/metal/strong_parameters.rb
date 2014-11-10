@@ -524,12 +524,12 @@ module ActionController
 
       def permitted_scalar_filter(params, key)
         if has_key?(key) && permitted_scalar?(self[key])
-          params[key] = self[key]
+          params[key] = self[key] unless params[key].present?
         end
 
         keys.grep(/\A#{Regexp.escape(key)}\(\d+[if]?\)\z/) do |k|
           if permitted_scalar?(self[k])
-            params[k] = self[k]
+            params[k] = self[k] unless params[k].present?
           end
         end
       end
@@ -542,7 +542,7 @@ module ActionController
 
       def array_of_permitted_scalars_filter(params, key)
         if has_key?(key) && array_of_permitted_scalars?(self[key])
-          params[key] = self[key]
+          params[key] = self[key] unless params[key].present?
         end
       end
 
@@ -552,6 +552,7 @@ module ActionController
 
         # Slicing filters out non-declared keys.
         slice(*filter.keys).each do |key, value|
+          next if params[key].present?
           next unless value
 
           if filter[key] == EMPTY_ARRAY
